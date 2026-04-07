@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,97 +9,89 @@
             --gold: #d4af37;
             --dark-bg: #121212;
             --card-bg: #1e1e1e;
-            --text-light: #e0e0e0;
+            --text-color: #e0e0e0;
             --border-color: #444;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--dark-bg);
-            color: var(--text-light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            color: var(--text-color);
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            max-width: 500px;
             width: 100%;
+            max-width: 450px;
             background: var(--card-bg);
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
             border: 1px solid var(--border-color);
         }
 
         h1 {
             color: var(--gold);
-            text-align: center;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-size: 0.9em;
-            color: #888;
             margin-bottom: 25px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .input-section {
             margin-bottom: 30px;
         }
 
-        input[type="date"] {
+        input[type="text"] {
+            width: 70%;
             padding: 12px;
             border-radius: 5px;
             border: 1px solid var(--border-color);
             background: #2a2a2a;
             color: white;
-            font-size: 16px;
-            outline: none;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 15px;
         }
 
         button {
+            width: 100%;
             padding: 12px;
-            background-color: var(--gold);
+            background: var(--gold);
             color: black;
             border: none;
             border-radius: 5px;
             font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.3s;
         }
 
-        button:hover { background-color: #f1c40f; }
+        button:hover {
+            background: #b8952d;
+            transform: translateY(-2px);
+        }
 
-        .results-section { display: none; margin-top: 20px; animation: fadeIn 0.5s; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .numbers-info {
+        .result-info {
             display: flex;
             justify-content: space-around;
             margin-bottom: 20px;
-            background: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
+            font-size: 1.1rem;
         }
 
-        .info-box { text-align: center; font-size: 0.9em; }
-        .info-box span { 
-            display: block; 
-            font-size: 26px; 
-            color: var(--gold); 
+        .result-info span {
+            color: var(--gold);
             font-weight: bold;
         }
 
-        .vedic-grid {
+        /* 3x3 Grid Layout */
+        .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
@@ -107,150 +99,167 @@
             max-width: 300px;
         }
 
-        .cell {
-            aspect-ratio: 1 / 1;
-            border: 2px solid var(--border-color);
+        .grid-item {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 1.4rem;
             background: #1a1a1a;
-            border-radius: 5px;
-            min-height: 90px;
+            border-radius: 8px;
+            transition: 0.3s;
+            min-height: 80px;
         }
 
-        .cell .pos-num { font-size: 10px; color: #555; margin-bottom: 5px; }
-        .cell .user-nums { font-size: 20px; font-weight: bold; color: #333; letter-spacing: 2px; }
+        .highlight {
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.2);
+            font-weight: bold;
+        }
 
-        .cell.active { border-color: var(--gold); background: #252115; }
-        .cell.active .user-nums { color: var(--gold); }
+        .stats {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background: #252525;
+            border-radius: 8px;
+        }
 
-        .summary { margin-top: 20px; font-size: 0.95em; border-top: 1px solid #333; padding-top: 15px; }
-        .summary p { margin: 8px 0; }
-        .summary strong { color: var(--gold); }
+        .stats p {
+            margin: 8px 0;
+        }
+
+        .strong-nums { color: var(--gold); font-weight: bold; }
+        .missing-nums { color: #888; }
+
+        @media (max-width: 400px) {
+            .grid-item { font-size: 1.1rem; min-height: 60px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>KKD Numerology</h1>
-        <div class="subtitle">Vedic Grid (वैदिक ग्रिड)</div>
-        
-        <div class="input-group">
-            <input type="date" id="dob">
-            <button onclick="generateGrid()">Generate Grid</button>
-        </div>
-
-        <div id="results" class="results-section">
-            <div class="numbers-info">
-                <div class="info-box">Root (मूलांक) <span id="display-rn">-</span></div>
-                <div class="info-box">Destiny (भाग्यांक) <span id="display-dn">-</span></div>
-            </div>
-
-            <div class="vedic-grid">
-                <div class="cell" id="cell-3"><div class="pos-num">3</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-1"><div class="pos-num">1</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-9"><div class="pos-num">9</div><div class="user-nums"></div></div>
-                
-                <div class="cell" id="cell-6"><div class="pos-num">6</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-7"><div class="pos-num">7</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-5"><div class="pos-num">5</div><div class="user-nums"></div></div>
-                
-                <div class="cell" id="cell-2"><div class="pos-num">2</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-8"><div class="pos-num">8</div><div class="user-nums"></div></div>
-                <div class="cell" id="cell-4"><div class="pos-num">4</div><div class="user-nums"></div></div>
-            </div>
-
-            <div class="summary">
-                <p><strong>Strong Numbers:</strong> <span id="strong-nos"></span></p>
-                <p><strong>Missing Numbers:</strong> <span id="missing-nos"></span></p>
-            </div>
-        </div>
+<div class="container">
+    <h1>KKD Numerology - Vedic Grid</h1>
+    
+    <div class="input-section">
+        <input type="text" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10">
+        <button onclick="generateGrid()">Generate Grid</button>
     </div>
 
-    <script>
-        function sumToSingleDigit(n) {
-            let sum = Math.abs(n);
-            while (sum > 9) {
-                sum = sum.toString().split('').reduce((acc, d) => acc + parseInt(d), 0);
-            }
-            return sum;
+    <div id="output" style="display: none;">
+        <div class="result-info">
+            <div>Root (R.N.): <span id="rnVal"></span></div>
+            <div>Destiny (D.N.): <span id="dnVal"></span></div>
+        </div>
+
+        <div class="grid-container" id="vedicGrid">
+            <div class="grid-item" id="cell-3"></div>
+            <div class="grid-item" id="cell-1"></div>
+            <div class="grid-item" id="cell-9"></div>
+            <div class="grid-item" id="cell-6"></div>
+            <div class="grid-item" id="cell-7"></div>
+            <div class="grid-item" id="cell-5"></div>
+            <div class="grid-item" id="cell-2"></div>
+            <div class="grid-item" id="cell-8"></div>
+            <div class="grid-item" id="cell-4"></div>
+        </div>
+
+        <div class="stats">
+            <p>Strong Numbers: <span id="strongList" class="strong-nums"></span></p>
+            <p>Missing Numbers: <span id="missingList" class="missing-nums"></span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple digit reducer function (Sum of digits until single digit)
+    function reduceToSingle(num) {
+        let sum = num.toString().split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+        return sum > 9 ? reduceToSingle(sum) : sum;
+    }
+
+    function getRootNumber(dob) {
+        let day = dob.split('/')[0];
+        return reduceToSingle(day);
+    }
+
+    function getDestinyNumber(dob) {
+        let digitsOnly = dob.replace(/\//g, '');
+        let totalSum = digitsOnly.split('').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+        return reduceToSingle(totalSum);
+    }
+
+    function generateGrid() {
+        const dob = document.getElementById('dobInput').value;
+        const dobRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+        if (!dobRegex.test(dob)) {
+            alert("Enter valid DOB (DD/MM/YYYY)");
+            return;
         }
 
-        function generateGrid() {
-            const dobInput = document.getElementById('dob').value;
-            if (!dobInput) { alert("कृपया सही जन्मतिथि चुनें"); return; }
+        // Logic Implementation
+        const rn = getRootNumber(dob);
+        const dn = getDestinyNumber(dob);
+        const dobDigits = dob.replace(/\//g, '').split('').map(Number).filter(n => n !== 0);
+        
+        // Final collection of all numbers to place in grid
+        const allNumbers = [...dobDigits, rn, dn];
+        
+        // Count frequencies
+        const counts = {};
+        for (let i = 1; i <= 9; i++) counts[i] = "";
+        
+        allNumbers.forEach(num => {
+            if (num >= 1 && num <= 9) {
+                counts[num] += num.toString();
+            }
+        });
 
-            const [year, month, dayStr] = dobInput.split('-');
-            const dayNum = parseInt(dayStr);
-            const monthNum = parseInt(month);
+        // Update UI
+        document.getElementById('rnVal').innerText = rn;
+        document.getElementById('dnVal').innerText = dn;
+        
+        const strongNums = [];
+        const missingNums = [];
+
+        // Grid positions mapping
+        const gridOrder = [3, 1, 9, 6, 7, 5, 2, 8, 4];
+        
+        gridOrder.forEach(num => {
+            const cell = document.getElementById(`cell-${num}`);
+            const value = counts[num];
             
-            let gridDigits = [];
-
-            // 1. नियम (a): DOB के सभी अंक शामिल करें (वर्ष के '19' को छोड़कर)
-            dayStr.split('').forEach(d => gridDigits.push(parseInt(d)));
-            month.split('').forEach(d => gridDigits.push(parseInt(d)));
+            cell.innerText = value;
             
-            if (year.startsWith("19")) {
-                gridDigits.push(parseInt(year[2]));
-                gridDigits.push(parseInt(year[3]));
+            if (value.length > 0) {
+                cell.classList.add('highlight');
+                if (!strongNums.includes(num)) strongNums.push(num);
             } else {
-                year.split('').forEach(d => gridDigits.push(parseInt(d)));
+                cell.classList.remove('highlight');
+                missingNums.push(num);
             }
+        });
 
-            // 2. नियम (b): Destiny Number (DN) - सभी अंकों का कुल योग
-            const allDigitsStr = dayStr + month + year;
-            const totalSum = allDigitsStr.split('').reduce((a, b) => a + parseInt(b), 0);
-            const dn = sumToSingleDigit(totalSum);
-            gridDigits.push(dn);
+        document.getElementById('strongList').innerText = strongNums.sort().join(', ');
+        document.getElementById('missingList').innerText = missingNums.sort().join(', ');
+        
+        document.getElementById('output').style.display = 'block';
+    }
 
-            // 3. नियम (c): Root Number (RN)
-            let rn;
-            // यदि जन्म तारीख एकल अंक है या 10, 20, 30 है
-            if (dayNum <= 9 || dayNum === 10 || dayNum === 20 || dayNum === 30) {
-                rn = sumToSingleDigit(dayNum);
-                gridDigits.push(rn);
-            } else {
-                // यदि तारीख दो अंकों में है (जैसे 12): अंक 1 और 2 अलग-अलग भरे जाएंगे + उनका योग (3) भी
-                const d1 = parseInt(dayStr[0]);
-                const d2 = parseInt(dayStr[1]);
-                gridDigits.push(d1, d2);
-                rn = sumToSingleDigit(d1 + d2);
-                gridDigits.push(rn);
-            }
-
-            // 4. ग्रिड भरना और UI अपडेट करना
-            let counts = {1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: ""};
-            let strong = new Set();
-
-            gridDigits.forEach(num => {
-                if (num > 0 && num <= 9) {
-                    counts[num] += num.toString();
-                    strong.add(num);
-                }
-            });
-
-            let missing = [];
-            for (let i = 1; i <= 9; i++) {
-                const cell = document.getElementById(`cell-${i}`);
-                const display = cell.querySelector('.user-nums');
-                display.innerText = counts[i];
-                
-                if (counts[i].length > 0) {
-                    cell.classList.add('active');
-                } else {
-                    cell.classList.remove('active');
-                    missing.push(i);
-                }
-            }
-
-            // परिणाम दिखाएं
-            document.getElementById('display-rn').innerText = rn;
-            document.getElementById('display-dn').innerText = dn;
-            document.getElementById('strong-nos').innerText = Array.from(strong).sort().join(', ');
-            document.getElementById('missing-nos').innerText = missing.join(', ');
-            document.getElementById('results').style.display = 'block';
+    // Auto-format input to add slashes
+    document.getElementById('dobInput').addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 2 && val.length <= 4) {
+            e.target.value = val.slice(0, 2) + '/' + val.slice(2);
+        } else if (val.length > 4) {
+            e.target.value = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
         }
-    </script>
+    });
+</script>
+
 </body>
 </html>
