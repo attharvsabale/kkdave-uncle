@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,7 +39,6 @@
             text-align: center;
             margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
         .subtitle {
@@ -63,6 +62,7 @@
             background: #2a2a2a;
             color: white;
             font-size: 16px;
+            outline: none;
         }
 
         button {
@@ -78,7 +78,9 @@
 
         button:hover { background-color: #f1c40f; }
 
-        .results-section { display: none; margin-top: 20px; }
+        .results-section { display: none; margin-top: 20px; animation: fadeIn 0.5s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .numbers-info {
             display: flex;
@@ -115,29 +117,24 @@
             background: #1a1a1a;
             border-radius: 5px;
             min-height: 90px;
-            transition: all 0.3s ease;
         }
 
-        .cell .pos-num { font-size: 10px; color: #444; margin-bottom: 5px; }
+        .cell .pos-num { font-size: 10px; color: #555; margin-bottom: 5px; }
         .cell .user-nums { font-size: 20px; font-weight: bold; color: #333; letter-spacing: 2px; }
 
-        .cell.active { border-color: var(--gold); }
+        .cell.active { border-color: var(--gold); background: #252115; }
         .cell.active .user-nums { color: var(--gold); }
 
         .summary { margin-top: 20px; font-size: 0.95em; border-top: 1px solid #333; padding-top: 15px; }
         .summary p { margin: 8px 0; }
         .summary strong { color: var(--gold); }
-
-        @media (max-width: 400px) {
-            .cell { min-height: 70px; }
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>KKD Numerology</h1>
-        <div class="subtitle">Vedic Grid Calculator</div>
+        <div class="subtitle">Vedic Grid (वैदिक ग्रिड)</div>
         
         <div class="input-group">
             <input type="date" id="dob">
@@ -146,8 +143,8 @@
 
         <div id="results" class="results-section">
             <div class="numbers-info">
-                <div class="info-box">Root (R.N.) <span id="display-rn">-</span></div>
-                <div class="info-box">Destiny (D.N.) <span id="display-dn">-</span></div>
+                <div class="info-box">Root (मूलांक) <span id="display-rn">-</span></div>
+                <div class="info-box">Destiny (भाग्यांक) <span id="display-dn">-</span></div>
             </div>
 
             <div class="vedic-grid">
@@ -173,7 +170,6 @@
 
     <script>
         function sumToSingleDigit(n) {
-            if (n === 0) return 0;
             let sum = Math.abs(n);
             while (sum > 9) {
                 sum = sum.toString().split('').reduce((acc, d) => acc + parseInt(d), 0);
@@ -182,64 +178,63 @@
         }
 
         function generateGrid() {
-            const dobVal = document.getElementById('dob').value;
-            if (!dobVal) { alert("Enter valid DOB"); return; }
+            const dobInput = document.getElementById('dob').value;
+            if (!dobInput) { alert("कृपया सही जन्मतिथि चुनें"); return; }
 
-            const [year, month, day] = dobVal.split('-');
-            const dayNum = parseInt(day);
+            const [year, month, dayStr] = dobInput.split('-');
+            const dayNum = parseInt(dayStr);
+            const monthNum = parseInt(month);
             
-            // 1. GRID NUMBERS ARRAY
-            let gridNumbers = [];
+            let gridDigits = [];
 
-            // (a) Add all digits except '19' from year
-            // Date digits
-            day.split('').forEach(d => gridNumbers.push(parseInt(d)));
-            // Month digits
-            month.split('').forEach(d => gridNumbers.push(parseInt(d)));
-            // Year digits (Handling '19' rule)
-            let yearDigits = year.split('');
+            // 1. नियम (a): DOB के सभी अंक शामिल करें (वर्ष के '19' को छोड़कर)
+            dayStr.split('').forEach(d => gridDigits.push(parseInt(d)));
+            month.split('').forEach(d => gridDigits.push(parseInt(d)));
+            
             if (year.startsWith("19")) {
-                gridNumbers.push(parseInt(yearDigits[2]));
-                gridNumbers.push(parseInt(yearDigits[3]));
+                gridDigits.push(parseInt(year[2]));
+                gridDigits.push(parseInt(year[3]));
             } else {
-                yearDigits.forEach(d => gridNumbers.push(parseInt(d)));
+                year.split('').forEach(d => gridDigits.push(parseInt(d)));
             }
 
-            // (b) Destiny Number (D.N.) - Sum of ALL DOB digits
-            const fullSum = (day + month + year).split('').reduce((a, b) => a + parseInt(b), 0);
-            const dn = sumToSingleDigit(fullSum);
-            gridNumbers.push(dn);
+            // 2. नियम (b): Destiny Number (DN) - सभी अंकों का कुल योग
+            const allDigitsStr = dayStr + month + year;
+            const totalSum = allDigitsStr.split('').reduce((a, b) => a + parseInt(b), 0);
+            const dn = sumToSingleDigit(totalSum);
+            gridDigits.push(dn);
 
-            // (c) Root Number (R.N.)
+            // 3. नियम (c): Root Number (RN)
             let rn;
+            // यदि जन्म तारीख एकल अंक है या 10, 20, 30 है
             if (dayNum <= 9 || dayNum === 10 || dayNum === 20 || dayNum === 30) {
                 rn = sumToSingleDigit(dayNum);
-                gridNumbers.push(rn);
+                gridDigits.push(rn);
             } else {
-                // Double digit date: add individual digits AND the sum
-                const d1 = parseInt(day[0]);
-                const d2 = parseInt(day[1]);
-                gridNumbers.push(d1, d2);
+                // यदि तारीख दो अंकों में है (जैसे 12): अंक 1 और 2 अलग-अलग भरे जाएंगे + उनका योग (3) भी
+                const d1 = parseInt(dayStr[0]);
+                const d2 = parseInt(dayStr[1]);
+                gridDigits.push(d1, d2);
                 rn = sumToSingleDigit(d1 + d2);
-                gridNumbers.push(rn);
+                gridDigits.push(rn);
             }
 
-            // 2. PROCESS GRID UI
+            // 4. ग्रिड भरना और UI अपडेट करना
             let counts = {1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: ""};
             let strong = new Set();
-            
-            gridNumbers.forEach(n => {
-                if (n > 0 && n <= 9) {
-                    counts[n] += n.toString();
-                    strong.add(n);
+
+            gridDigits.forEach(num => {
+                if (num > 0 && num <= 9) {
+                    counts[num] += num.toString();
+                    strong.add(num);
                 }
             });
 
             let missing = [];
             for (let i = 1; i <= 9; i++) {
                 const cell = document.getElementById(`cell-${i}`);
-                const displayArea = cell.querySelector('.user-nums');
-                displayArea.innerText = counts[i];
+                const display = cell.querySelector('.user-nums');
+                display.innerText = counts[i];
                 
                 if (counts[i].length > 0) {
                     cell.classList.add('active');
@@ -249,7 +244,7 @@
                 }
             }
 
-            // 3. UPDATE INFO
+            // परिणाम दिखाएं
             document.getElementById('display-rn').innerText = rn;
             document.getElementById('display-dn').innerText = dn;
             document.getElementById('strong-nos').innerText = Array.from(strong).sort().join(', ');
